@@ -2,32 +2,39 @@
 """ UTF-8 Validation """
 
 
-
 def validUTF8(data):
-    def get_num_bytes(char):
-        # Count the number of leading ones in the binary representation to determine the byte length
-        num_bytes = 0
-        mask = 1 << 7  # 10000000
-        while char & mask:
-            num_bytes += 1
-            mask >>= 1
-        return num_bytes
+    """
+    Method that determines if a given data set represents a valid
+    UTF-8 encoding.
+    """
+    number_bytes = 0
 
-    # Loop through the data list
-    i = 0
-    while i < len(data):
-        num_bytes = get_num_bytes(data[i])
+    mask_1 = 1 << 7
+    mask_2 = 1 << 6
 
-        # Check if the byte length is within the valid range (1 to 4 bytes)
-        if num_bytes < 1 or num_bytes > 4:
-            return False
+    for i in data:
 
-        # Check the subsequent bytes for validity
-        for j in range(1, num_bytes):
-            i += 1
-            if i >= len(data) or (data[i] >> 6) != 0b10:  # The next bytes should start with '10'
+        mask_byte = 1 << 7
+
+        if number_bytes == 0:
+
+            while mask_byte & i:
+                number_bytes += 1
+                mask_byte = mask_byte >> 1
+
+            if number_bytes == 0:
+                continue
+
+            if number_bytes == 1 or number_bytes > 4:
                 return False
 
-        i += 1  # Move to the next character
+        else:
+            if not (i & mask_1 and not (i & mask_2)):
+                    return False
 
-    return True
+        number_bytes -= 1
+
+    if number_bytes == 0:
+        return True
+
+    return False
